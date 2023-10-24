@@ -44,16 +44,18 @@ public class UserService implements UserDetailsService {
 	}
 
 	protected User authenticated() {
-		
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		Jwt jwtPrincipal = (Jwt) authentication.getPrincipal();
-		String username = jwtPrincipal.getClaim("username");
-		
-		User user = userRepository.findByEmail(username).orElseThrow(() -> {
-			throw new UsernameNotFoundException("User not found.");
-		});
-		
-		return user;
+		try {
+			
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			Jwt jwtPrincipal = (Jwt) authentication.getPrincipal();
+			String username = jwtPrincipal.getClaim("username");
+			
+			return userRepository.findByEmail(username).get();
+			
+		}
+		catch(Exception e) {
+			throw new UsernameNotFoundException("Invalid user");
+		}
 	}
 	
 	@Transactional(readOnly = true)

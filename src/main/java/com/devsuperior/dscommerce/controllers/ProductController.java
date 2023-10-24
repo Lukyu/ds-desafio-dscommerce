@@ -7,8 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +23,7 @@ import com.devsuperior.dscommerce.dto.ProductMinDTO;
 import com.devsuperior.dscommerce.services.ProductService;
 
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 
 @RestController
 @RequestMapping(value = "/products")
@@ -37,6 +41,13 @@ public class ProductController {
 		return ResponseEntity.ok(dto);
 		
 	}
+
+	@GetMapping(value = "/{id}")
+	public ResponseEntity<ProductDTO> find(@PathVariable Long id) {
+		ProductDTO dto = productService.findById(id);
+		return ResponseEntity.ok(dto);
+		
+	}
 	
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PostMapping
@@ -44,5 +55,20 @@ public class ProductController {
 		dto = productService.insert(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
 		return ResponseEntity.created(uri).body(dto);
+	}
+
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@PutMapping(value = "/{id}")
+	public ResponseEntity<ProductDTO> update(@Valid @RequestBody ProductDTO dto, @PathVariable Long id) {
+		dto = productService.update(id, dto);
+		return ResponseEntity.ok(dto);
+	}
+
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		productService.delete(id);
+		return ResponseEntity.noContent().build();
+		
 	}
 }
